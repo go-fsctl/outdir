@@ -30,8 +30,13 @@ func TestInsideAWorkTreeIsRefused(t *testing.T) {
 	if err == nil {
 		t.Fatal("a directory inside a work tree was accepted")
 	}
-	if !strings.Contains(err.Error(), tree) {
-		t.Errorf("the refusal does not name the tree at %s: %v", tree, err)
+	// ⚠ The RESOLVED form. On Windows a temporary directory is handed out under
+	// an 8.3 short name -- C:\\Users\\RUNNER~1 -- and resolving it expands that to
+	// runneradmin, so the refusal names a path the test never typed. That is the
+	// right thing for it to name: it is the path the work tree is actually at.
+	want := resolved(t, tree)
+	if !strings.Contains(err.Error(), want) {
+		t.Errorf("the refusal does not name the tree at %s: %v", want, err)
 	}
 
 	// And outside: a sibling of the tree, not under it.
